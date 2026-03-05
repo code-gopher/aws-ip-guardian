@@ -174,7 +174,7 @@ func discoverEC2Instances(cfg aws.Config, accountName, region string, account co
 			srv.Domains = matchDomainMappings(account.DomainMappings, instanceName, region)
 
 			servers = append(servers, srv)
-			log.Printf("[INFO] [Discovery] 发现 EC2 实例: %s (%s) IP: %s", serverName, instanceID, publicIP)
+			log.Printf("[INFO] [Discovery] [账号: %s] 发现 EC2 实例: %s (%s) IP: %s", accountName, serverName, instanceID, publicIP)
 		}
 	}
 
@@ -229,7 +229,7 @@ func discoverLightsailInstances(cfg aws.Config, accountName, region string, acco
 		srv.Domains = matchDomainMappings(account.DomainMappings, instanceName, region)
 
 		servers = append(servers, srv)
-		log.Printf("[INFO] [Discovery] 发现 Lightsail 实例: %s (静态IP: %s) IP: %s", serverName, staticIPName, publicIP)
+		log.Printf("[INFO] [Discovery] [账号: %s] 发现 Lightsail 实例: %s (静态IP: %s) IP: %s", accountName, serverName, staticIPName, publicIP)
 	}
 
 	return servers, nil

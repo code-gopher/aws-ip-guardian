@@ -152,14 +152,14 @@ func (s *Scheduler) checkServer(ctx context.Context, srv config.ServerConfig) {
 	// 根据服务器类型获取当前 IP
 	currentIP, err := s.getServerIP(srv)
 	if err != nil {
-		log.Printf("[ERROR] [%s] 获取实例 IP 失败: %v", srv.Name, err)
+		log.Printf("[ERROR] [账号: %s] [%s] 获取实例 IP 失败: %v", srv.Account, srv.Name, err)
 		return
 	}
 
 	// TCPing 检测
 	result := s.detector.Check(currentIP)
 	if result.Reachable {
-		log.Printf("[DEBUG] [%s] 服务器可达，IP: %s，延迟: %v", srv.Name, currentIP, result.Latency)
+		log.Printf("[DEBUG] [账号: %s] [%s] 服务器可达，IP: %s，延迟: %v", srv.Account, srv.Name, currentIP, result.Latency)
 	}
 
 	// 记录结果，判断是否触发告警
@@ -169,7 +169,7 @@ func (s *Scheduler) checkServer(ctx context.Context, srv config.ServerConfig) {
 	}
 
 	// 触发告警 → 换 IP 流程
-	log.Printf("[WARN] [%s] 触发 IP 更换流程，被墙 IP: %s", srv.Name, currentIP)
+	log.Printf("[WARN] [账号: %s] [%s] 触发 IP 更换流程，被墙 IP: %s", srv.Account, srv.Name, currentIP)
 	s.handleBlockedIP(ctx, srv, currentIP)
 }
 
@@ -205,27 +205,27 @@ func (s *Scheduler) swapServerIP(srv config.ServerConfig) (oldIP, newIP string, 
 func (s *Scheduler) handleBlockedIP(ctx context.Context, srv config.ServerConfig, oldIP string) {
 	// 发送被墙告警通知
 	if err := s.notifier.NotifyBlocked(ctx, srv.Name, srv.Region, oldIP); err != nil {
-		log.Printf("[ERROR] [%s] 发送被墙告警通知失败: %v", srv.Name, err)
+		log.Printf("[ERROR] [账号: %s] [%s] 发送被墙告警通知失败: %v", srv.Account, srv.Name, err)
 	}
 
 	// 更换 IP
 	_, newIP, err := s.swapServerIP(srv)
 	if err != nil {
-		log.Printf("[ERROR] [%s] 更换 IP 失败: %v", srv.Name, err)
+		log.Printf("[ERROR] [账号: %s] [%s] 更换 IP 失败: %v", srv.Account, srv.Name, err)
 		if notifyErr := s.notifier.NotifyError(ctx, srv.Name, srv.Region, "更换 IP", err); notifyErr != nil {
-			log.Printf("[ERROR] [%s] 发送失败通知也失败了: %v", srv.Name, notifyErr)
+			log.Printf("[ERROR] [账号: %s] [%s] 发送失败通知也失败了: %v", srv.Account, srv.Name, notifyErr)
 		}
 		return
 	}
 
-	log.Printf("[INFO] [%s] IP 更换成功: %s -> %s", srv.Name, oldIP, newIP)
+	log.Printf("[INFO] [账号: %s] [%s] IP 更换成功: %s -> %s", srv.Account, srv.Name, oldIP, newIP)
 
 	// 更新 Cloudflare DNS
 	updatedDomains := s.updateDNS(ctx, srv, newIP)
 
 	// 发送成功通知
 	if err := s.notifier.NotifySwapped(ctx, srv.Name, srv.Region, oldIP, newIP, updatedDomains); err != nil {
-		log.Printf("[ERROR] [%s] 发送成功通知失败: %v", srv.Name, err)
+		log.Printf("[ERROR] [账号: %s] [%s] 发送成功通知失败: %v", srv.Account, srv.Name, err)
 	}
 }
 
@@ -234,14 +234,14 @@ func (s *Scheduler) updateDNS(ctx context.Context, srv config.ServerConfig, newI
 	var updatedDomains []string
 	for _, domain := range srv.Domains {
 		if err := s.dns.UpdateARecord(ctx, domain.ZoneID, domain.RecordName, newIP); err != nil {
-			log.Printf("[ERROR] [%s] 更新 DNS 记录失败 (%s): %v", srv.Name, domain.RecordName, err)
+			log.Printf("[ERROR] [账号: %s] [%s] 更新 DNS 记录失败 (%s): %v", srv.Account, srv.Name, domain.RecordName, err)
 			if notifyErr := s.notifier.NotifyError(ctx, srv.Name, srv.Region,
 				"更新DNS: "+domain.RecordName, err); notifyErr != nil {
-				log.Printf("[ERROR] [%s] 发送 DNS 更新失败通知也失败了: %v", srv.Name, notifyErr)
+				log.Printf("[ERROR] [账号: %s] [%s] 发送 DNS 更新失败通知也失败了: %v", srv.Account, srv.Name, notifyErr)
 			}
 			continue
 		}
-		log.Printf("[INFO] [%s] DNS 记录已更新: %s -> %s", srv.Name, domain.RecordName, newIP)
+		log.Printf("[INFO] [账号: %s] [%s] DNS 记录已更新: %s -> %s", srv.Account, srv.Name, domain.RecordName, newIP)
 		updatedDomains = append(updatedDomains, domain.RecordName)
 	}
 
