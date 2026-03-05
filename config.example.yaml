@@ -1,0 +1,69 @@
+# IP 检测配置
+detection:
+  interval: 3m                # 检测间隔
+  fail_threshold: 3           # 连续失败次数达到此值判定为被墙
+  tcp_port: 22                # TCPing 检测端口 (建议: 22, 443, 80)
+  tcp_timeout: 3s             # TCP 连接超时
+
+# AWS 账号列表（支持多个账号）
+# 系统会自动扫描每个账号指定区域下的所有 EC2/Lightsail 实例
+aws_accounts:
+  account_1:
+    access_key_id: "YOUR_AWS_ACCESS_KEY_ID"
+    secret_access_key: "YOUR_AWS_SECRET_ACCESS_KEY"
+    # 指定扫描区域（不配置则扫描默认区域：日本/韩国/新加坡/香港/德国）
+    regions:
+      - ap-southeast-1       # 新加坡
+      - ap-northeast-1       # 日本
+      - ap-northeast-2       # 韩国
+      - ap-east-1            # 香港
+      - eu-central-1         # 德国
+    # 域名映射：通过实例名模式匹配，自动关联域名
+    domain_mappings:
+      - pattern: "*sg*"                   # 实例名包含 "sg" 的
+        zone_id: "YOUR_CLOUDFLARE_ZONE_ID"
+        record_name: "your-domain.com"
+      - pattern: "*jp*"                   # 实例名包含 "jp" 的
+        zone_id: "YOUR_CLOUDFLARE_ZONE_ID"
+        record_name: "jp.your-domain.com"
+
+# Cloudflare API
+cloudflare:
+  api_token: "YOUR_CLOUDFLARE_API_TOKEN"
+
+# Telegram Bot
+telegram:
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN"
+  chat_id: "YOUR_TELEGRAM_CHAT_ID"
+  proxy: ""                              # 可选，留空或删除则直连
+                                         # 支持格式: http://127.0.0.1:7890 或 socks5://127.0.0.1:1080
+
+# 脱敏配置（默认启用）
+# 启用后 Telegram 通知中的 IP 和域名会被部分遮掩
+# IP: 1.2.3.4 -> 1.2.*.*
+# 域名: aws-proxy-sg.example.com -> a***g.***.com
+masking:
+  enabled: true
+
+# 服务器列表（可选）
+# 如果不配置，系统会自动从上面的 AWS 账号发现所有运行中的实例
+# 手动配置的服务器优先级高于自动发现
+# servers:
+#   - name: "SG-Lightsail-1"
+#     type: "lightsail"
+#     account: "account_1"
+#     instance_id: "Debian-sg"
+#     region: "ap-southeast-1"
+#     static_ip_name: "sg-static-ip"
+#     domains:
+#       - zone_id: "YOUR_CLOUDFLARE_ZONE_ID"
+#         record_name: "your-domain.com"
+#
+#   - name: "JP-EC2-1"
+#     type: "ec2"
+#     account: "account_1"
+#     instance_id: "i-1234567890abcdef0"
+#     region: "ap-northeast-1"
+#     domains:
+#       - zone_id: "YOUR_CLOUDFLARE_ZONE_ID"
+#         record_name: "jp.your-domain.com"
