@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  aws-ip-guardian:
+    image: ghcr.io/code-gopher/aws-ip-guardian:latest
+    container_name: aws-ip-guardian
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - TZ=Asia/Shanghai
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

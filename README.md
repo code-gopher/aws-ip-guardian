@@ -3,6 +3,7 @@
 [![Build Release](https://github.com/code-gopher/aws-ip-guardian/actions/workflows/build.yml/badge.svg)](https://github.com/code-gopher/aws-ip-guardian/actions/workflows/build.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/code-gopher/aws-ip-guardian/pkgs/container/aws-ip-guardian)
 
 English | [简体中文](README_CN.md)
 
@@ -165,6 +166,33 @@ nohup ./ip-monitor --config config.yaml > monitor.log 2>&1 &
 
 ### 4. Docker Deployment
 
+#### Using GitHub Container Registry (Recommended)
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/code-gopher/aws-ip-guardian:latest
+
+# Run container
+docker run -d \
+  --name aws-ip-guardian \
+  --restart unless-stopped \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  ghcr.io/code-gopher/aws-ip-guardian:latest
+```
+
+#### Using specific version
+
+```bash
+docker pull ghcr.io/code-gopher/aws-ip-guardian:v1.0.0
+docker run -d \
+  --name aws-ip-guardian \
+  --restart unless-stopped \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  ghcr.io/code-gopher/aws-ip-guardian:v1.0.0
+```
+
+#### Build from source
+
 ```bash
 # Build image
 docker build -t aws-ip-guardian .
@@ -175,6 +203,30 @@ docker run -d \
   --restart unless-stopped \
   -v $(pwd)/config.yaml:/app/config.yaml:ro \
   aws-ip-guardian
+```
+
+#### Docker Compose
+
+Create `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  aws-ip-guardian:
+    image: ghcr.io/code-gopher/aws-ip-guardian:latest
+    container_name: aws-ip-guardian
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - TZ=Asia/Shanghai
+```
+
+Run with:
+
+```bash
+docker-compose up -d
 ```
 
 ## 🔧 How It Works
@@ -249,6 +301,12 @@ Supported platforms:
 - Windows (AMD64, ARM64)
 - Linux (AMD64, ARM64)
 - macOS (AMD64, ARM64)
+
+Docker images are automatically built for:
+- linux/amd64
+- linux/arm64
+
+Available on GitHub Container Registry: `ghcr.io/code-gopher/aws-ip-guardian`
 
 ## 🤝 Contributing
 

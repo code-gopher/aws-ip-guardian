@@ -23,6 +23,7 @@ go.work
 
 # Configuration files with secrets
 config.yaml
+docker-compose.override.yml
 
 # IDE
 .idea/

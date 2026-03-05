@@ -3,6 +3,7 @@
 [![Build Release](https://github.com/code-gopher/aws-ip-guardian/actions/workflows/build.yml/badge.svg)](https://github.com/code-gopher/aws-ip-guardian/actions/workflows/build.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/code-gopher/aws-ip-guardian/pkgs/container/aws-ip-guardian)
 
 [English](README.md) | 简体中文
 
@@ -165,6 +166,33 @@ nohup ./ip-monitor --config config.yaml > monitor.log 2>&1 &
 
 ### 4. Docker 部署
 
+#### 使用 GitHub Container Registry（推荐）
+
+```bash
+# 拉取最新镜像
+docker pull ghcr.io/code-gopher/aws-ip-guardian:latest
+
+# 运行容器
+docker run -d \
+  --name aws-ip-guardian \
+  --restart unless-stopped \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  ghcr.io/code-gopher/aws-ip-guardian:latest
+```
+
+#### 使用特定版本
+
+```bash
+docker pull ghcr.io/code-gopher/aws-ip-guardian:v1.0.0
+docker run -d \
+  --name aws-ip-guardian \
+  --restart unless-stopped \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  ghcr.io/code-gopher/aws-ip-guardian:v1.0.0
+```
+
+#### 从源码构建
+
 ```bash
 # 构建镜像
 docker build -t aws-ip-guardian .
@@ -175,6 +203,30 @@ docker run -d \
   --restart unless-stopped \
   -v $(pwd)/config.yaml:/app/config.yaml:ro \
   aws-ip-guardian
+```
+
+#### Docker Compose
+
+创建 `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  aws-ip-guardian:
+    image: ghcr.io/code-gopher/aws-ip-guardian:latest
+    container_name: aws-ip-guardian
+    restart: unless-stopped
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - TZ=Asia/Shanghai
+```
+
+运行：
+
+```bash
+docker-compose up -d
 ```
 
 ## 🔧 工作原理

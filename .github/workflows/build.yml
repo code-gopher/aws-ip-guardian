@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Build Binary
     runs-on: ubuntu-latest
     strategy:
       matrix:
